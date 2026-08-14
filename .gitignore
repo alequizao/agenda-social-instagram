@@ -1,0 +1,37 @@
+# --- Credenciais e ambiente ---
+config.php
+.env
+.env.*
+!.env.example
+.claude/
+.user.ini
+alequizao/
+
+# --- Dados de cliente / conteudo publicado ---
+uploads/
+logs/
+_arquivo_morto/
+audio/
+modelos/
+dicionarios/
+modelosdeimagensdentrodeonibus/
+
+# --- Dumps do banco ---
+*.sql
+
+# --- Dependencias ---
+vendor/
+node_modules/
+
+# --- Temporarios ---
+*.log
+tmp/
+cache/
+*.bak
+*.bak-*
+*.tar.gz
+*.zip
+
+# --- Sistema ---
+.DS_Store
+Thumbs.db

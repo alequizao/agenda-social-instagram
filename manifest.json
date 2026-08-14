@@ -1,0 +1,22 @@
+{
+  "name": "Agenda Social — Mesa de Redação",
+  "short_name": "Agenda Social",
+  "description": "Redator-chefe: filtra notícias de Maceió por tema e aprova o que vai ao ar no Instagram.",
+  "lang": "pt-BR",
+  "start_url": "/agendamentos/dashboard.php",
+  "scope": "/agendamentos/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#0f172a",
+  "theme_color": "#2563EB",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Mesa de Redação", "url": "/agendamentos/noticias.php", "description": "Aprovar matérias do dia" },
+    { "name": "Agendados", "url": "/agendamentos/agendados.php" },
+    { "name": "Direct", "url": "/agendamentos/direct.php" }
+  ]
+}
