@@ -31,7 +31,7 @@ em tempo real.
 
 ## 📸 Telas
 
-[![Agenda Social — painel de agendamento e publicação automática no Instagram, desenvolvido por Alex Junior (alequizao)](https://image.thum.io/get/width/700/https://publishdev.com.br/agendamentos/)](https://publishdev.com.br/agendamentos/)
+[![Agenda Social — painel de agendamento e publicação automática no Instagram, desenvolvido por Alex Junior (alequizao)](screenshots/tela-principal.png)](https://publishdev.com.br/agendamentos/)
 
 ## 🧱 Stack
 
