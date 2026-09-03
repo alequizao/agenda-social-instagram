@@ -92,7 +92,9 @@ if ($u && !$autoPausada) {
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="Agenda Social">
   <link rel="apple-touch-icon" href="<?= BASE_URL ?>/icons/apple-touch-icon.png">
-  <link rel="icon" type="image/png" href="<?= BASE_URL ?>/icons/icon-192.png">
+  <link rel="icon" href="<?= BASE_URL ?>/favicon.ico?v=<?= APP_VERSAO ?>" sizes="32x32">
+  <link rel="icon" type="image/png" href="<?= BASE_URL ?>/favicon-32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="<?= BASE_URL ?>/icons/icon-192.png" sizes="192x192">
   <script>
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {

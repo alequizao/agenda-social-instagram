@@ -2,7 +2,7 @@
 
 > Sistema PHP de **redação editorial + publicação no Instagram** via Graph API da Meta (Content Publishing).
 > Pasta: `/www/wwwroot/publishdev.com.br/agendamentos` · URL: `https://publishdev.com.br/agendamentos`
-> **Versão atual: 3.10.2** · Última atualização deste doc: 2026-08-05
+> **Versão atual: 3.10.3** · Última atualização deste doc: 2026-08-05
 > Desenvolvido por **@alequizao** · (82) 98871-7072 · alexjuniorcalado@gmail.com
 
 > ⚠️ **REGRA DE MANUTENÇÃO (obrigatória):** a CADA alteração de código,
@@ -319,7 +319,7 @@ Seis jogos novos em `lib_jogos.php`, além da forca (`lib_jogo.php`). Menu: a pe
 - **Migração:** `migracao_jogos.sql` (`jogo_sessoes`, `jogo_resultados`, `termo_dia`) +
   `dicionarios/termo5.idx` (976 palavras de 5 letras).
 
-### v3.10.2 — aba Jogo ao vivo (AJAX) e números unificados
+### v3.10.3 — aba Jogo ao vivo (AJAX) e números unificados
 
 - `jogo.php?ajax=live&cli=N` devolve **só o bloco que muda** (`partials/jogo_live.php`): KPIs, arcade,
   palavra do dia, funil, ranking, jogadores e partidas. A página troca o `innerHTML` de `#jogoLive`
