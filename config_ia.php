@@ -1,4 +1,8 @@
 <?php
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 require __DIR__ . '/init.php';
 exigir_login();
 require __DIR__ . '/lib_arte_codigo.php';

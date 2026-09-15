@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * cron_noticias.php — automação MULTI-PERFIL.
  * A cada minuto, para CADA perfil com automação ligada (config_perfil ia_ativo=1):

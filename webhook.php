@@ -1,4 +1,8 @@
 <?php
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * webhook.php — endpoint público do Webhook da Meta (mensagens do Direct).
  *

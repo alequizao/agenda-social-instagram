@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * jogo.php — painel do Jogo da Forca do Direct.
  * Mostra ranking, partidas recentes, palavras mais difíceis e liga/desliga por perfil.

@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * lib_jogos.php — ARCADE do Direct: Termo, Quiz, Enigma, Jogo da Velha,
  * Anagrama e Adivinha o número. (A Forca fica em lib_jogo.php, com tabela própria.)

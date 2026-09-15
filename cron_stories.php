@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * cron_stories.php — captura os STORIES ativos de cada cliente e guarda no histórico.
  *

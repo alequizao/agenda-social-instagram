@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * automacao_toggle.php — liga/desliga a automação inteira (botão da barra do topo).
  * Grava a flag global "automacao_pausada"; os crons de postagem/geração checam e param.

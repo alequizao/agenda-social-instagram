@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * cron_onibus_geo.php — geocodifica (lat/lng) os endereços das paradas, aos poucos.
  *

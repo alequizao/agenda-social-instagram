@@ -1,4 +1,8 @@
 <?php
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /** Cabecalho compartilhado (padrao Designi Alequizao). Espera $page_title e (opcional) $body_class. */
 $page_title = $page_title ?? APP_NAME;
 $body_class = $body_class ?? '';

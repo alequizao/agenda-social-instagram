@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * lib_jogo_arte.php — arte da FORCA por código (GD). Visual próprio do jogo, independente do perfil.
  * Sem IA, custo zero. Usada no início e no fim da partida (dm_jogo_arte=1).

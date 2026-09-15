@@ -2,6 +2,10 @@
 
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 /**
  * cron_jogo.php — manutenção do Jogo da Forca (rodar a cada 5 minutos).
  *

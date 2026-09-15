@@ -1,6 +1,10 @@
 <?php
 declare(strict_types=1);
 
+/*
+ * Agenda Social · Desenvolvido por Alequizao <alequizao.dev@gmail.com>
+ * https://github.com/alequizao · © 2026 Alequizao. Todos os direitos reservados.
+ */
 require __DIR__ . '/config.php';
 
 /* ---- Limites de runtime (o php.ini do servidor vinha com memory_limit=1024 bytes,
