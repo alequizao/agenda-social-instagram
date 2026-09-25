@@ -8,7 +8,7 @@
    - Navegações/páginas (GET): network-first com fallback ao cache.
    - POST e tudo mais: passa direto pela rede (nunca cacheia ação).
    Troque APP_CACHE ao mudar a versão p/ forçar atualização. */
-const APP_CACHE = 'agenda-social-v3.10.3';
+const APP_CACHE = 'agenda-social-v3.10.7';
 const SHELL = [
   'app.css',
   'icons/icon-192.png',

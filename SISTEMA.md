@@ -2,7 +2,7 @@
 
 > Sistema PHP de **redação editorial + publicação no Instagram** via Graph API da Meta (Content Publishing).
 > Pasta: `/www/wwwroot/publishdev.com.br/agendamentos` · URL: `https://publishdev.com.br/agendamentos`
-> **Versão atual: 3.10.3** · Última atualização deste doc: 2026-08-05
+> **Versão atual: 3.10.7** · Última atualização deste doc: 2026-08-05
 > Desenvolvido por **@alequizao** · (82) 98871-7072 · alexjuniorcalado@gmail.com
 
 > ⚠️ **REGRA DE MANUTENÇÃO (obrigatória):** a CADA alteração de código,

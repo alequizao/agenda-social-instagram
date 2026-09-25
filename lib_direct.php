@@ -610,10 +610,14 @@ function dm_responder_link_story(PDO $db, array $cliente, string $remetenteId, s
     }
 
     // match EXATO: story respondido -> publicação que o originou
-    $st = $db->prepare('SELECT fonte_url FROM ' . DB_PREFIX . 'publicacoes
+    $st = $db->prepare('SELECT fonte_url, fonte_nome, ia_dados FROM ' . DB_PREFIX . 'publicacoes
         WHERE cliente_id=? AND tipo="story" AND status="publicado" AND ig_media_id=? LIMIT 1');
     $st->execute([$cid, $storyMediaId]);
-    $url = trim((string) ($st->fetchColumn() ?: ''));
+    $pubRow = $st->fetch(PDO::FETCH_ASSOC) ?: [];
+    $url = trim((string) ($pubRow['fonte_url'] ?? ''));
+    $iaDados = json_decode((string) ($pubRow['ia_dados'] ?? ''), true) ?: [];
+    $titulo = trim((string) ($iaDados['titulo'] ?? ''));
+    $fonte = trim((string) ($pubRow['fonte_nome'] ?? '')) ?: trim((string) ($iaDados['fonte'] ?? ''));
     if ($url === '') {
         return ['enviou' => false, 'motivo' => "story {$storyMediaId} não encontrado nas publicações deste perfil", 'url' => ''];
     }
@@ -642,6 +646,14 @@ function dm_responder_link_story(PDO $db, array $cliente, string $remetenteId, s
     $saudacao = $modelo !== ''
         ? trim((string) preg_replace('/\s*\{link\}\s*/u', '', $modelo)) // remove o {link} do texto
         : 'Aqui está a matéria completa 👇';
+    // {titulo} e {fonte}: a linha inteira some se o valor estiver vazio
+    foreach (['{titulo}' => $titulo, '{fonte}' => $fonte] as $tag => $val) {
+        if ($val === '') {
+            $saudacao = (string) preg_replace('/^.*' . preg_quote($tag, '/') . '.*$\R?/mu', '', $saudacao);
+        }
+        $saudacao = str_replace($tag, $val, $saudacao);
+    }
+    $saudacao = trim((string) preg_replace('/\n{3,}/', "\n\n", $saudacao));
 
     dm_acao($cliente, $remetenteId, 'mark_seen');
     if ($saudacao !== '') {

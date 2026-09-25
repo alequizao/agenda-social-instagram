@@ -35,3 +35,6 @@ cache/
 # --- Sistema ---
 .DS_Store
 Thumbs.db
+
+# --- Backups locais de tokens (segredo) ---
+_bkp_*/

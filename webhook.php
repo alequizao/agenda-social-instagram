@@ -98,6 +98,8 @@ try {
                 continue;
             }
             $soJogo = false; // true = remetente é perfil nosso; só o jogo pode responder
+            $storyId = (string) ($msg['reply_to']['story']['id'] ?? '');
+            $storyProprio = false; // perfil nosso respondendo story: link liberado (não gera loop)
             $conversaId = dm_conversa_obter($db, (int) $cliente['id'], $senderId);
             // se a conversa ainda não tem nome, tenta descobrir o @username na Meta
             $temNome = (string) $db->query('SELECT nome FROM ' . DB_PREFIX . 'dm_conversas WHERE id=' . (int) $conversaId)->fetchColumn();
@@ -117,6 +119,8 @@ try {
                     // exceção controlada: JOGADA curta (letra/palavra) continua valendo, pra
                     // poder testar o jogo do nosso outro @. Todo o resto é ignorado.
                     $ehJogada = jogo_ativo((int) $cliente['id']) && $texto !== '' && mb_strlen($texto, 'UTF-8') <= 20;
+                    $storyProprio = $storyId !== '';
+                    $ehJogada = $ehJogada || $storyProprio;
                     wlog('perfil nosso @' . $convNome . ' -> cliente#' . $cliente['id']
                         . ($ehJogada ? ' (só jogo)' : ' IGNORADO (anti-loop)'));
                     if (!$ehJogada) {
@@ -127,9 +131,8 @@ try {
             }
 
             // resposta a um STORY nosso? envia o link da matéria de origem (determinístico)
-            $storyId = (string) ($msg['reply_to']['story']['id'] ?? '');
             $respLink = false;
-            if ($nova && !$soJogo && $storyId !== '') {
+            if ($nova && (!$soJogo || $storyProprio) && $storyId !== '') {
                 $r = dm_responder_link_story($db, $cliente, $senderId, $storyId);
                 $respLink = $r['enviou'];
                 wlog(($respLink ? 'LINK ENVIADO' : 'link NÃO enviado')

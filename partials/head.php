@@ -243,6 +243,16 @@ if ($u && !$autoPausada) {
       <a class="topbar__logout" href="<?= BASE_URL ?>/logout.php" title="Sair" aria-label="Sair"><i class="fa-solid fa-right-from-bracket"></i></a>
     </div>
   </header>
+  <?php foreach (tokens_em_risco(db()) as $tk): ?>
+  <div class="auto-banner auto-banner--rl">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>Conexão do Instagram <b>@<?= e((string) ($tk['ig_username'] ?: $tk['nome'])) ?></b>
+      <?= !empty($tk['vencido']) ? 'expirou em' : 'expira em' ?>
+      <b><?= e(date('d/m/Y H:i', strtotime((string) $tk['token_expira_em']))) ?></b>
+      — <?= !empty($tk['vencido']) ? 'nada será publicado até reconectar.' : 'a renovação automática tentará sozinha; se falhar, reconecte.' ?></span>
+    <a class="auto-banner__btn" href="<?= BASE_URL ?>/cliente_instagram.php?id=<?= (int) $tk['id'] ?>"><i class="fa-solid fa-plug"></i> Reconectar</a>
+  </div>
+  <?php endforeach; ?>
   <?php if ($autoPausada): ?>
   <div class="auto-banner">
     <i class="fa-solid fa-circle-pause"></i>

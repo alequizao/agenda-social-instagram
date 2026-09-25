@@ -284,6 +284,20 @@ function pub_erro_transitorio(string $erro): bool
  *  - transitorio  + ainda ha tentativas -> reagenda com backoff (status volta a "agendado")
  *  - permanente OU tentativas esgotadas -> status="erro" (aparece no relatorio p/ republicar)
  */
+/* Avisa (no maximo 1x por dia) que um token precisa de reconexao manual.
+   O aviso aparece como faixa no topo do painel (partials/head.php) e no log. */
+function pub_avisar_token(PDO $db, array $cli, string $erro): void
+{
+    $id   = (int) $cli['id'];
+    $hoje = date('Y-m-d');
+    if (cfg_get('token_aviso_' . $id, '') === $hoje) {
+        return;
+    }
+    cfg_set('token_aviso_' . $id, $hoje);
+    cfg_set('token_erro_' . $id, mb_substr($erro, 0, 300));
+    error_log('[agendamentos] token do cliente #' . $id . ' precisa de reconexao manual: ' . $erro);
+}
+
 function pub_tratar_falha(PDO $db, array $p, string $erro): array
 {
     $pubId = (int) $p['id'];

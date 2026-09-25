@@ -50,24 +50,38 @@ if ($pausa > 0) {
     exit(0);
 }
 
-/* ---- Renova tokens IG de longa duracao perto de expirar (faltando <= 10 dias) ---- */
-$tokens = $db->query('SELECT id, access_token FROM ' . DB_PREFIX . 'clientes
-    WHERE access_token IS NOT NULL AND token_expira_em IS NOT NULL
-      AND token_expira_em <= (NOW() + INTERVAL 10 DAY)')->fetchAll();
+/* ---- Renova tokens perto de expirar (<=10 dias) OU sem validade conhecida ---- */
+$tokens = $db->query('SELECT id, nome, ig_username, access_token, token_expira_em
+    FROM ' . DB_PREFIX . 'clientes
+    WHERE access_token IS NOT NULL AND access_token <> ""
+      AND (token_expira_em IS NULL OR token_expira_em <= (NOW() + INTERVAL 10 DAY))')->fetchAll();
 foreach ($tokens as $cli) {
-    if (stripos((string) $cli['access_token'], 'IG') !== 0) {
-        continue; // so tokens Instagram Login renovam por aqui
+    // apos uma falha, so tenta de novo daqui 1h (nao martela a Meta a cada minuto)
+    $ultimaFalha = (int) cfg_get('token_falha_ts_' . (int) $cli['id'], '0');
+    if ($ultimaFalha > 0 && (time() - $ultimaFalha) < 3600) {
+        continue;
     }
-    $r = ig_renovar_token((string) $cli['access_token']);
-    if ($r['ok'] && !empty($r['dados']['access_token'])) {
-        $seg = (int) ($r['dados']['expires_in'] ?? 0);
-        $exp = $seg > 0 ? date('Y-m-d H:i:s', time() + $seg) : null;
-        $db->prepare('UPDATE ' . DB_PREFIX . 'clientes SET access_token=?, token_expira_em=? WHERE id=?')
-           ->execute([$r['dados']['access_token'], $exp, (int) $cli['id']]);
-        logln('token renovado: cliente #' . (int) $cli['id']);
-    } else {
-        logln('falha ao renovar token do cliente #' . (int) $cli['id'] . ': ' . ($r['erro'] ?? ''));
+    // sem validade no banco: descobre com a Meta antes de renovar a toa
+    if ($cli['token_expira_em'] === null) {
+        $ts = token_expira_timestamp((string) $cli['access_token']);
+        if ($ts > 0) {
+            $db->prepare('UPDATE ' . DB_PREFIX . 'clientes SET token_expira_em=? WHERE id=?')
+               ->execute([date('Y-m-d H:i:s', $ts), (int) $cli['id']]);
+            logln('validade descoberta p/ cliente #' . (int) $cli['id'] . ': ' . date('Y-m-d H:i:s', $ts));
+            if ($ts > time() + 10 * 86400) {
+                continue; // ainda longe de vencer
+            }
+        }
     }
+    $r = cliente_renovar_token($db, $cli);
+    if ($r['ok']) {
+        logln('token renovado: cliente #' . (int) $cli['id'] . ' (' . (string) $cli['nome'] . ') valido ate ' . ($r['expira'] ?? 'sem data'));
+        cfg_set('token_falha_ts_' . (int) $cli['id'], '0');
+        continue;
+    }
+    logln('falha ao renovar token do cliente #' . (int) $cli['id'] . ' (' . (string) $cli['nome'] . '): ' . $r['erro']);
+    cfg_set('token_falha_ts_' . (int) $cli['id'], (string) time());
+    pub_avisar_token($db, $cli, $r['erro']);
 }
 
 /* Marca posts atrasados/perdidos como erro antes de processar */

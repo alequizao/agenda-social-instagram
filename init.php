@@ -539,6 +539,87 @@ function ig_renovar_token(string $longToken): array
     ]));
 }
 
+/* Estende um token do Facebook (EAA...) por mais 60 dias.
+   Requer IG_APP_ID + IG_APP_SECRET preenchidos (.env.secreto). */
+function fb_renovar_token(string $token): array
+{
+    if (IG_APP_ID === '' || IG_APP_SECRET === '') {
+        return ['ok' => false, 'erro' => 'IG_APP_ID/IG_APP_SECRET nao configurados no .env.secreto.'];
+    }
+    return graph_get('oauth/access_token', [
+        'grant_type'        => 'fb_exchange_token',
+        'client_id'         => IG_APP_ID,
+        'client_secret'     => IG_APP_SECRET,
+        'fb_exchange_token' => $token,
+        'access_token'      => $token, // so define o host (graph.facebook.com)
+    ]);
+}
+
+/* Pergunta a Meta quando o token expira (debug_token). Retorna timestamp ou 0. */
+function token_expira_timestamp(string $token): int
+{
+    if ($token === '' || IG_APP_ID === '' || IG_APP_SECRET === '') {
+        return 0;
+    }
+    if (stripos($token, 'IG') === 0) {
+        return 0; // graph.instagram.com nao expoe debug_token
+    }
+    $r = graph_get('debug_token', [
+        'input_token'  => $token,
+        'access_token' => IG_APP_ID . '|' . IG_APP_SECRET,
+    ]);
+    if (empty($r['ok'])) {
+        return 0;
+    }
+    return (int) ($r['dados']['data']['expires_at'] ?? 0);
+}
+
+/* Data de expiracao a gravar. null = nunca expira ou desconhecida. */
+function token_data_expiracao(string $token, int $expiresIn = 0): ?string
+{
+    if ($expiresIn > 0) {
+        return date('Y-m-d H:i:s', time() + $expiresIn);
+    }
+    $ts = token_expira_timestamp($token);
+    return $ts > 0 ? date('Y-m-d H:i:s', $ts) : null;
+}
+
+/* Renova o token de um cliente (IG... ou EAA...) e ja grava no banco. */
+function cliente_renovar_token(PDO $db, array $cli): array
+{
+    $token = trim((string) ($cli['access_token'] ?? ''));
+    if ($token === '') {
+        return ['ok' => false, 'erro' => 'cliente sem token', 'expira' => null];
+    }
+    $r = (stripos($token, 'IG') === 0) ? ig_renovar_token($token) : fb_renovar_token($token);
+    if (empty($r['ok']) || empty($r['dados']['access_token'])) {
+        return ['ok' => false, 'erro' => (string) ($r['erro'] ?? 'a Meta nao devolveu token'), 'expira' => null];
+    }
+    $novo = (string) $r['dados']['access_token'];
+    $exp  = token_data_expiracao($novo, (int) ($r['dados']['expires_in'] ?? 0));
+    $db->prepare('UPDATE ' . DB_PREFIX . 'clientes SET access_token=?, token_expira_em=? WHERE id=?')
+       ->execute([$novo, $exp, (int) $cli['id']]);
+    return ['ok' => true, 'erro' => '', 'expira' => $exp];
+}
+
+/* Clientes com token vencido ou vencendo em ate N dias (aviso no painel). */
+function tokens_em_risco(PDO $db, int $dias = 7): array
+{
+    try {
+        $st = $db->prepare('SELECT id, nome, ig_username, token_expira_em,
+                  (token_expira_em <= NOW()) AS vencido
+             FROM ' . DB_PREFIX . 'clientes
+            WHERE access_token IS NOT NULL AND access_token <> \'\'
+              AND token_expira_em IS NOT NULL
+              AND token_expira_em <= (NOW() + INTERVAL ? DAY)
+            ORDER BY token_expira_em');
+        $st->execute([$dias]);
+        return $st->fetchAll();
+    } catch (Throwable $e) {
+        return [];
+    }
+}
+
 /* Le os dados do perfil IG (funciona com token IG... ou token de pagina FB). */
 function ig_perfil(string $token, string $igId = '', int $timeout = 25): array
 {

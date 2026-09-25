@@ -117,6 +117,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     }
                 }
+                if ($expira === null) { // EAA, ou IG sem expires_in: pergunta a Meta
+                    $expira = token_data_expiracao($pageToken);
+                }
                 $up = db()->prepare('UPDATE ' . DB_PREFIX . 'clientes
                     SET access_token=?, ig_user_id=?, fb_page_id=?, token_expira_em=?, ig_username=COALESCE(NULLIF(?,""), ig_username), conectado_em=NOW() WHERE id=?');
                 $up->execute([$pageToken, $igId, $pageId ?: null, $expira, $igUser, $id]);
