@@ -213,15 +213,17 @@ function onibus_scrape_catalogo(PDO $db): array
 /** Extrai serviceId, paradas, horários e janela de operação do HTML de uma linha. */
 function onibus_parse_linha(string $html): array
 {
-    $out = ['service_id' => '', 'paradas' => [], 'horarios' => [], 'operacao' => ''];
+    $out = ['service_id' => '', 'paradas' => [], 'horarios' => [], 'operacao' => '', 'partidas' => null];
 
     if (preg_match('/id="serviceId"[^>]*value="([0-9a-fA-F-]{36})"/', $html, $m)) {
         $out['service_id'] = $m[1];
     }
 
-    // paradas: data-stop-id + stop-name aparecem na mesma ordem
+    // paradas: data-stop-id + stop-name aparecem na mesma ordem.
+    // 2026-09-25: a página ganhou CSS inline com ".stop-name { ... }" — o regex antigo pegava o CSS
+    // como nome da 1ª parada e desalinhava todas. Agora só casa o ATRIBUTO class="... stop-name ...".
     preg_match_all('/data-stop-id="([0-9a-fA-F-]{36})"/', $html, $ids);
-    preg_match_all('/stop-name[^>]*>([^<]+)</', $html, $nomes);
+    preg_match_all('/class="[^"]*\bstop-name\b[^"]*"[^>]*>([^<]+)</', $html, $nomes);
     $ids = $ids[1] ?? [];
     $nomes = $nomes[1] ?? [];
     foreach ($ids as $i => $id) {
@@ -232,8 +234,13 @@ function onibus_parse_linha(string $html): array
         ];
     }
 
-    // horários por dia: bloco "container-horarios-mobile" (colunas "Dia" e "Horário")
+    // horários por dia: bloco "container-horarios" (antes "container-horarios-mobile"; colunas
+    // "Dia", "Horário" e, desde 09/2026, "Frequência")
     $pos = strpos($html, 'container-horarios-mobile');
+    if ($pos === false) {
+        $pos = strpos($html, 'container-horarios"');
+    }
+    $freqs = [];
     if ($pos !== false) {
         $seg = substr($html, $pos, 5000);
         // cada célula é <p class="p-14">...</p> — pode ter <b> dentro (cabeçalhos)
@@ -249,14 +256,41 @@ function onibus_parse_linha(string $html): array
         foreach ($vals as $v) {
             if ($v === 'Dia') { $modo = 'dia'; continue; }
             if ($v === 'Horário' || $v === 'Horario') { $modo = 'faixa'; continue; }
+            if ($v === 'Frequência' || $v === 'Frequencia') { $modo = 'freq'; continue; }
             if ($v === '') { continue; }
             if ($modo === 'dia') { $dias[] = $v; }
             elseif ($modo === 'faixa') { $faixas[] = $v; }
+            elseif ($modo === 'freq') { $freqs[] = $v; }
         }
         foreach ($dias as $i => $d) {
             if (isset($faixas[$i]) && $faixas[$i] !== '') {
                 $out['horarios'][$d] = $faixas[$i];
             }
+        }
+    }
+
+    // partidas programadas por parada (JSON "line-departures-v1": posição da parada => ["HH:MM", ...])
+    // + a data a que se referem (departureTime do ld+json). Usado pelo app do relógio (relogio_onibus.php).
+    if (preg_match('#<script[^>]*id="line-departures-v1"[^>]*>(.*?)</script>#s', $html, $m)) {
+        $dep = json_decode(html_entity_decode($m[1], ENT_QUOTES, 'UTF-8'), true);
+        if (is_array($dep) && $dep) {
+            $data = '';
+            if (preg_match('/"departureTime"\s*:\s*\[\s*"(\d{4}-\d{2}-\d{2})T/', $html, $dm)) {
+                $data = $dm[1];
+            }
+            $p = [];
+            foreach ($dep as $k => $lista) {
+                if (is_array($lista)) {
+                    $p[(string) $k] = array_values(array_filter($lista, fn($h) => is_string($h) && preg_match('/^\d{2}:\d{2}$/', $h)));
+                }
+            }
+            $fq = [];
+            foreach ($dias ?? [] as $i => $d) {
+                if (isset($freqs[$i])) {
+                    $fq[$d] = $freqs[$i];
+                }
+            }
+            $out['partidas'] = ['d' => $data ?: date('Y-m-d'), 'p' => $p, 'f' => $fq];
         }
     }
 
@@ -280,12 +314,13 @@ function onibus_scrape_linha(PDO $db, array $linha): array
     }
     $d = onibus_parse_linha($r['corpo']);
     $db->prepare('UPDATE onibus_linhas
-        SET service_id=?, operacao=?, horarios=?, paradas=?, detalhe_em=NOW()
+        SET service_id=?, operacao=?, horarios=?, paradas=?, partidas=?, detalhe_em=NOW()
         WHERE id=?')->execute([
         $d['service_id'],
         $d['operacao'],
         json_encode($d['horarios'], JSON_UNESCAPED_UNICODE),
         json_encode($d['paradas'], JSON_UNESCAPED_UNICODE),
+        $d['partidas'] !== null ? json_encode($d['partidas'], JSON_UNESCAPED_UNICODE) : null,
         (int) $linha['id'],
     ]);
     return ['ok' => true, 'erro' => ''];

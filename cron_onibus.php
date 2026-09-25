@@ -48,11 +48,14 @@ if ($cat['ok']) {
     olog('catálogo FALHOU: ' . $cat['erro']);
 }
 
-/* 2) detalhes em lote — primeiro as sem detalhe, depois as mais antigas */
+/* 2) detalhes em lote — primeiro as que algum relógio (app "Próximo Ônibus") consultou nos
+      últimos 14 dias e ainda não foram atualizadas hoje (horários programados frescos), depois
+      as sem detalhe, depois as mais antigas */
 $lote = (int) ($argv[1] ?? getenv('LOTE') ?: 40);
 $lote = max(1, min(300, $lote));
 $linhas = $db->query('SELECT id, slug FROM onibus_linhas
-    ORDER BY detalhe_em IS NULL DESC, detalhe_em ASC
+    ORDER BY COALESCE(relogio_em > NOW() - INTERVAL 14 DAY AND (detalhe_em IS NULL OR detalhe_em < CURDATE()), 0) DESC,
+             detalhe_em IS NULL DESC, detalhe_em ASC
     LIMIT ' . $lote)->fetchAll();
 
 $ok = 0;
